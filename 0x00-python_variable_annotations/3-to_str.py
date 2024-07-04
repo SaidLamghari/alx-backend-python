@@ -1,9 +1,18 @@
 #!/usr/bin/env python3
 """
-Module pour définir des variables avec annotations
+Module pour la fonction to_str
+Auteur SAID LAMGHARI
 """
 
-a: int = 1
-pi: float = 3.14
-i_understand_annotations: bool = True
-school: str = "Holberton"
+
+def to_str(n: float) -> str:
+    """
+    Convertir un flottant en chaîne de caractères.
+
+    Args:
+    n (float): Le flottant à convertir.
+
+    Returns:
+    str: La représentation en chaîne de caractères du flottant.
+    """
+    return str(n)
