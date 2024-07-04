@@ -3,7 +3,6 @@
 Module pour la fonction safely_get_value
 Auteur SAID LAMGHARI
 """
-
 from typing import Mapping, Any, Union, TypeVar
 T = TypeVar('T')
 
