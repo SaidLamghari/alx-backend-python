@@ -4,6 +4,7 @@ Module pour la fonction add
 Auteur: SAID LAMGHARI
 """
 
+
 def add(a: float, b: float) -> float:
     """
     Ajouter deux flottants et retourner la somme en tant que flottant.
