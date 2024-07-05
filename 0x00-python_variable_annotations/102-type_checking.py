@@ -7,7 +7,7 @@ Auteur SAID LAMGHARI
 from typing import List, Tuple
 
 
-def zoom_array(lst: Tuple, factor: int = 2) -> List[int]:
+def zoom_array(lst: Tuple, factor: int = 2) -> List:
     """
     Zoomer sur un tableau en répétant
     chaque élément un certain nombre de fois.
