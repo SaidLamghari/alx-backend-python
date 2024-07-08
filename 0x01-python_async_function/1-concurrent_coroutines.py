@@ -7,7 +7,7 @@ attendre plusieurs délais aléatoires simultanément.
 import asyncio
 from typing import List
 # Importe la coroutine wait_random du fichier 0-basic_async_syntax.py
-from 0-basic_async_syntax import wait_random
+wait_random = __import__('0-basic_async_syntax').wait_random
 
 
 async def wait_n(n: int, max_delay: int) -> List[float]:
