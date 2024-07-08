@@ -17,7 +17,7 @@ import asyncio
 import random
 
 
-async def wait_random(max_delay=10):
+async def wait_random(max_delay: int = 10) -> float:
     """
     Coroutine asynchrone qui attend un délai
     aléatoire entre 0 et max_delay secondes.
