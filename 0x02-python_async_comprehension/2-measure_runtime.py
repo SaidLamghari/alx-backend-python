@@ -26,5 +26,5 @@ async def measure_runtime() -> float:
         async_comprehension(),
         async_comprehension()
     )
-    end_tme = time.perf_counter()
-    return end_tme - start_tme
+
+    return time.perf_counter() - start_tme
