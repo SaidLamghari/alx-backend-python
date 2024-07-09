@@ -5,7 +5,6 @@ Auteur SAID LAMGHARI
 
 import asyncio
 import time
-# Assurez-vous que le chemin d'importation est correct
 async_comprehension = __import__('1-async_comprehension').async_comprehension
 
 
@@ -21,8 +20,10 @@ async def measure_runtime() -> float:
     # Utilisation de asyncio.gather pour exécuter
     # async_comprehension quatre fois en parallèle
     await asyncio.gather(
-        async_comprehension(), async_comprehension(),
-        async_comprehension(), async_comprehension()
+        async_comprehension(),
+        async_comprehension(),
+        async_comprehension(),
+        async_comprehension()
     )
-
-    return time.perf_counter() - start_tme
+    end_tme = time.perf_counter()
+    return end_tme - start_tme
