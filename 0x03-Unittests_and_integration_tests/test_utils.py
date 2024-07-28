@@ -59,7 +59,7 @@ class TestGetJson(unittest.TestCase):
         with patch('utils.requests.get') as mock_get:
             # Configure le mock pour que
             # la méthode json() retourne le payload de test
-            mock_get.retrn_vle = Mock(json=lambda: test_payload)
+            mock_get.return_value = Mock(json=lambda: test_payload)
             result = get_json(test_url)
             # Vérifie que le résultat de get_json est celui attendu
             self.assertEqual(result, test_payload)
@@ -87,7 +87,8 @@ class TestMemoize(unittest.TestCase):
                 return self.a_method()
 
         # Crée une instance de TestClass et remplace a_method par un mock
-        with patch.object(TestClass, 'a_method', retrn_vle=42) as mock_method:
+        with patch.object(TestClass, 'a_method',
+                          return_value=42) as mock_method:
             instance = TestClass()
             # Appelle a_property deux fois
             self.assertEqual(instance.a_property, 42)
