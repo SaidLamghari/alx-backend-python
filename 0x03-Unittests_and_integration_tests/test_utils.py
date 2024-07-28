@@ -88,10 +88,10 @@ class TestMemoize(unittest.TestCase):
 
         # Crée une instance de TestClass et remplace a_method par un mock
         with patch.object(TestClass, 'a_method',
-                          return_value=42) as mock_mthd:
+                          return_value=42) as mock_method:
             instance = TestClass()
             # Appelle a_property deux fois
             self.assertEqual(instance.a_property, 42)
             self.assertEqual(instance.a_property, 42)
             # Vérifie que a_method n'a été appelé qu'une seule fois
-            mock_mthd.assert_called_once()
+            mock_method.assert_called_once()
