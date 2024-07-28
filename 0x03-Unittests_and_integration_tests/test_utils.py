@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """
 Tests unitaires pour les fonctions utilitaires
-Auteur SAID LAMGHARI
 """
 import unittest
 from parameterized import parameterized
@@ -20,7 +19,12 @@ class TestAccessNestedMap(unittest.TestCase):
     ])
     def test_access_nested_map(self, nested_map, path, expected):
         """
-        Teste que access_nested_map retourne la valeur correcte en fonction du chemin
+        Teste que access_nested_map retourne la valeur correcte pour un chemin donné.
+        
+        Args:
+            nested_map (dict): Dictionnaire imbriqué à tester.
+            path (tuple): Chemin pour accéder à la valeur dans le dictionnaire.
+            expected (any): Valeur attendue à obtenir.
         """
         self.assertEqual(access_nested_map(nested_map, path), expected)
 
@@ -30,13 +34,16 @@ class TestAccessNestedMap(unittest.TestCase):
     ])
     def test_access_nested_map_exception(self, nested_map, path):
         """
-        Teste que access_nested_map lève une KeyError pour des chemins invalides
+        Teste que access_nested_map lève une KeyError pour des chemins invalides.
+        
+        Args:
+            nested_map (dict): Dictionnaire imbriqué à tester.
+            path (tuple): Chemin pour accéder à la valeur dans le dictionnaire.
         """
         with self.assertRaises(KeyError) as cm:
             access_nested_map(nested_map, path)
         # Vérifie que le message d'exception correspond au chemin recherché
         self.assertEqual(str(cm.exception), str(path))
-
 
 class TestGetJson(unittest.TestCase):
     """
@@ -49,7 +56,11 @@ class TestGetJson(unittest.TestCase):
     ])
     def test_get_json(self, test_url, test_payload):
         """
-        Teste que get_json retourne le payload correct pour une URL donnée
+        Teste que get_json retourne le payload correct pour une URL donnée.
+        
+        Args:
+            test_url (str): URL pour tester la fonction get_json.
+            test_payload (dict): Payload attendu en réponse à l'URL.
         """
         with patch('utils.requests.get') as mock_get:
             # Configure le mock pour que la méthode json() retourne le payload de test
@@ -60,7 +71,6 @@ class TestGetJson(unittest.TestCase):
             # Vérifie que requests.get a été appelé exactement une fois avec l'URL donnée
             mock_get.assert_called_once_with(test_url)
 
-
 class TestMemoize(unittest.TestCase):
     """
     Cas de test pour le décorateur memoize
@@ -68,21 +78,25 @@ class TestMemoize(unittest.TestCase):
 
     def test_memoize(self):
         """
-        Teste le décorateur memoize pour s'assurer qu'il met en cache les résultats
+        Teste le décorateur memoize pour s'assurer qu'il met en cache les résultats.
+        
+        Vérifie que a_method est appelé une seule fois même si a_property est accédé plusieurs fois.
         """
         class TestClass:
-            def a_method(self):
+            def a_method(self) -> int:
                 return 42
 
             @memoize
-            def a_property(self):
+            def a_property(self) -> int:
                 return self.a_method()
 
-        # Crée une instance de TestClass et remplace a_method par un mock
         with patch.object(TestClass, 'a_method', return_value=42) as mock_method:
             instance = TestClass()
             # Appelle a_property deux fois
-            self.assertEqual(instance.a_property, 42)
-            self.assertEqual(instance.a_property, 42)
-            # Vérifie que a_method n'a été appelé qu'une seule fois
+            result_first_call = instance.a_property()
+            result_second_call = instance.a_property()
+            # Vérifie que a_method a été appelé une seule fois
             mock_method.assert_called_once()
+            # Vérifie que les deux appels retournent le même résultat
+            self.assertEqual(result_first_call, 42)
+            self.assertEqual(result_second_call, 42)
