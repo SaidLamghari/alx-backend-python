@@ -1,113 +1,88 @@
 #!/usr/bin/env python3
 """
+Tests unitaires pour les fonctions utilitaires
 Auteur SAID LAMGHARI
 """
-
 import unittest
-from unittest.mock import patch, Mock
 from parameterized import parameterized
-from utils import access_nested_map, get_json, memoize  # Ajustez les chemins d'importation si nécessaire
+from unittest.mock import patch, Mock
+from utils import access_nested_map, get_json, memoize
 
 class TestAccessNestedMap(unittest.TestCase):
+    """
+    Cas de test pour la fonction access_nested_map
+    """
+
     @parameterized.expand([
         ({"a": 1}, ("a",), 1),
         ({"a": {"b": 2}}, ("a",), {"b": 2}),
-        ({"a": {"b": 2}}, ("a", "b"), 2),
+        ({"a": {"b": 2}}, ("a", "b"), 2)
     ])
     def test_access_nested_map(self, nested_map, path, expected):
         """
-        Teste la fonction access_nested_map avec divers inputs.
-        
-        Args:
-            nested_map (dict): Le dictionnaire imbriqué à tester.
-            path (tuple): Le chemin pour accéder à la valeur dans le dictionnaire.
-            expected (any): Le résultat attendu.
+        Teste que access_nested_map retourne la valeur correcte en fonction du chemin
         """
-        # Vérifie si le résultat de la fonction correspond au résultat attendu
         self.assertEqual(access_nested_map(nested_map, path), expected)
 
     @parameterized.expand([
         ({}, ("a",)),
-        ({"a": 1}, ("a", "b")),
+        ({"a": 1}, ("a", "b"))
     ])
     def test_access_nested_map_exception(self, nested_map, path):
         """
-        Teste que KeyError est levée avec des inputs invalides.
-
-        Args:
-            nested_map (dict): Le dictionnaire imbriqué à tester.
-            path (tuple): Le chemin pour accéder à la valeur dans le dictionnaire.
+        Teste que access_nested_map lève une KeyError pour des chemins invalides
         """
-        # Vérifie si une KeyError est levée lorsqu'on appelle access_nested_map avec des inputs invalides
-        with self.assertRaises(KeyError) as context:
+        with self.assertRaises(KeyError) as cm:
             access_nested_map(nested_map, path)
-        
-        # Vérifie que le message d'exception correspond à celui attendu
-        self.assertEqual(str(context.exception), str(KeyError(path[-1])))
+        # Vérifie que le message d'exception correspond au chemin recherché
+        self.assertEqual(str(cm.exception), str(path))
+
 
 class TestGetJson(unittest.TestCase):
-    @patch('utils.requests.get')  # Remplace requests.get utilisé dans la fonction get_json
-    def test_get_json(self, mock_get):
-        """
-        Teste que la fonction get_json retourne le résultat attendu et fonctionne correctement.
-        
-        Args:
-            mock_get (Mock): La méthode requests.get mockée.
-        """
-        # Définir les cas de test
-        test_cases = [
-            ("http://example.com", {"payload": True}),
-            ("http://holberton.io", {"payload": False}),
-        ]
+    """
+    Cas de test pour la fonction get_json
+    """
 
-        for test_url, test_payload in test_cases:
-            # Configure le mock pour retourner le test_payload
-            mock_response = Mock()
-            mock_response.json.return_value = test_payload
-            mock_get.return_value = mock_response
-            
-            # Appelle la fonction avec l'URL de test
+    @parameterized.expand([
+        ("http://example.com", {"payload": True}),
+        ("http://holberton.io", {"payload": False})
+    ])
+    def test_get_json(self, test_url, test_payload):
+        """
+        Teste que get_json retourne le payload correct pour une URL donnée
+        """
+        with patch('utils.requests.get') as mock_get:
+            # Configure le mock pour que la méthode json() retourne le payload de test
+            mock_get.return_value = Mock(json=lambda: test_payload)
             result = get_json(test_url)
-            
-            # Vérifie si requests.get a été appelé avec l'URL de test
-            mock_get.assert_called_once_with(test_url)
-            
-            # Vérifie que le résultat correspond au test_payload
+            # Vérifie que le résultat de get_json est celui attendu
             self.assertEqual(result, test_payload)
+            # Vérifie que requests.get a été appelé exactement une fois avec l'URL donnée
+            mock_get.assert_called_once_with(test_url)
 
-            # Réinitialise le mock pour le prochain cas de test
-            mock_get.reset_mock()
 
 class TestMemoize(unittest.TestCase):
-    @patch('utils.TestClass.a_method')  # Remplace a_method dans TestClass
-    def test_memoize(self, mock_a_method):
+    """
+    Cas de test pour le décorateur memoize
+    """
+
+    def test_memoize(self):
         """
-        Teste que le décorateur memoize met en cache correctement les résultats.
-        
-        Args:
-            mock_a_method (MagicMock): La méthode a_method mockée.
+        Teste le décorateur memoize pour s'assurer qu'il met en cache les résultats
         """
         class TestClass:
-            def a_method(self) -> int:
+            def a_method(self):
                 return 42
 
             @memoize
-            def a_property(self) -> int:
+            def a_property(self):
                 return self.a_method()
 
-        # Crée une instance de TestClass
-        instance = TestClass()
-        
-        # Configure le mock pour retourner une valeur spécifique
-        mock_a_method.return_value = 42
-        
-        # Appelle la propriété mémoisée deux fois
-        result_first_call = instance.a_property()
-        result_second_call = instance.a_property()
-        
-        # Vérifie que a_method a été appelé une seule fois
-        mock_a_method.assert_called_once()
-        
-        # Vérifie que les deux appels retournent le même résultat
-        self.assertEqual(result_first_call, 42)
-        self.assertEqual(result_second_call, 42)
+        # Crée une instance de TestClass et remplace a_method par un mock
+        with patch.object(TestClass, 'a_method', return_value=42) as mock_method:
+            instance = TestClass()
+            # Appelle a_property deux fois
+            self.assertEqual(instance.a_property, 42)
+            self.assertEqual(instance.a_property, 42)
+            # Vérifie que a_method n'a été appelé qu'une seule fois
+            mock_method.assert_called_once()
