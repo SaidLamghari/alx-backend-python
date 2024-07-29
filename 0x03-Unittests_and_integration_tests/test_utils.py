@@ -121,7 +121,8 @@ class TestMemoize(unittest.TestCase):
                 return self.a_method()
 
         # Patch de la méthode a_method pour retourner une valeur fixe
-        with patch.object(TestClass, 'a_method', return_value=42) as mock_method:
+        with patch.object(TestClass, 'a_method',
+                          return_value=42) as mock_method:
             instance = TestClass()
             # Premier appel, la méthode doit être exécutée
             self.assertEqual(instance.a_property, 42)
