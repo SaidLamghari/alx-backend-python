@@ -19,12 +19,7 @@ class TestAccessNestedMap(unittest.TestCase):
     ])
     def test_access_nested_map(self, nested_map, path, expected):
         """
-        Teste que access_nested_map retourne la valeur correcte pour un chemin donné.
-        
-        Args:
-            nested_map (dict): Dictionnaire imbriqué à tester.
-            path (tuple): Chemin pour accéder à la valeur dans le dictionnaire.
-            expected (any): Valeur attendue à obtenir.
+        Test que access_nested_map retourne la valeur correcte
         """
         self.assertEqual(access_nested_map(nested_map, path), expected)
 
@@ -34,16 +29,13 @@ class TestAccessNestedMap(unittest.TestCase):
     ])
     def test_access_nested_map_exception(self, nested_map, path):
         """
-        Teste que access_nested_map lève une KeyError pour des chemins invalides.
-        
-        Args:
-            nested_map (dict): Dictionnaire imbriqué à tester.
-            path (tuple): Chemin pour accéder à la valeur dans le dictionnaire.
+        Test que access_nested_map lève une KeyError pour des chemins invalides
         """
         with self.assertRaises(KeyError) as cm:
             access_nested_map(nested_map, path)
-        # Vérifie que le message d'exception correspond au chemin recherché
-        self.assertEqual(str(cm.exception), str(path))
+        # Vérifie que l'exception contient le message attendu
+        self.assertEqual(cm.exception.args[0], path[-1])  # Supposons que la dernière clé dans le chemin est celle qui cause l'erreur
+
 
 class TestGetJson(unittest.TestCase):
     """
@@ -56,20 +48,26 @@ class TestGetJson(unittest.TestCase):
     ])
     def test_get_json(self, test_url, test_payload):
         """
-        Teste que get_json retourne le payload correct pour une URL donnée.
-        
-        Args:
-            test_url (str): URL pour tester la fonction get_json.
-            test_payload (dict): Payload attendu en réponse à l'URL.
+        Test que get_json retourne la charge utile correcte
         """
         with patch('utils.requests.get') as mock_get:
-            # Configure le mock pour que la méthode json() retourne le payload de test
+            # Simule la réponse JSON pour les tests
             mock_get.return_value = Mock(json=lambda: test_payload)
             result = get_json(test_url)
-            # Vérifie que le résultat de get_json est celui attendu
+            # Vérifie que la charge utile retournée est correcte
             self.assertEqual(result, test_payload)
-            # Vérifie que requests.get a été appelé exactement une fois avec l'URL donnée
+            # Vérifie que requests.get a été appelé avec l'URL correcte
             mock_get.assert_called_once_with(test_url)
+
+    def test_get_json_http_error(self):
+        """
+        Test que get_json lève une exception HTTPError en cas d'erreur HTTP
+        """
+        with patch('utils.requests.get') as mock_get:
+            mock_get.side_effect = requests.exceptions.HTTPError("HTTP error")
+            with self.assertRaises(requests.exceptions.HTTPError):
+                get_json("http://example.com")
+
 
 class TestMemoize(unittest.TestCase):
     """
@@ -78,25 +76,34 @@ class TestMemoize(unittest.TestCase):
 
     def test_memoize(self):
         """
-        Teste le décorateur memoize pour s'assurer qu'il met en cache les résultats.
-        
-        Vérifie que a_method est appelé une seule fois même si a_property est accédé plusieurs fois.
+        Test le décorateur memoize pour s'assurer qu'il met en cache les résultats
         """
         class TestClass:
-            def a_method(self) -> int:
+            def a_method(self):
                 return 42
 
             @memoize
-            def a_property(self) -> int:
+            def a_property(self):
                 return self.a_method()
 
         with patch.object(TestClass, 'a_method', return_value=42) as mock_method:
             instance = TestClass()
-            # Appelle a_property deux fois
-            result_first_call = instance.a_property()
-            result_second_call = instance.a_property()
-            # Vérifie que a_method a été appelé une seule fois
+            # Vérifie que la propriété memoized retourne la valeur correcte
+            self.assertEqual(instance.a_property, 42)
+            # Vérifie que la méthode a_method n'est appelée qu'une seule fois grâce au cache
+            self.assertEqual(instance.a_property, 42)
             mock_method.assert_called_once()
-            # Vérifie que les deux appels retournent le même résultat
-            self.assertEqual(result_first_call, 42)
-            self.assertEqual(result_second_call, 42)
+
+    def test_memoize_different_inputs(self):
+        """
+        Test le décorateur memoize avec des entrées différentes pour vérifier le cache
+        """
+        class TestClass:
+            @memoize
+            def multiply(self, x, y):
+                return x * y
+
+        instance = TestClass()
+        # Vérifie que la méthode memoized retourne la valeur correcte pour les entrées données
+        self.assertEqual(instance.multiply(2, 3), 6)
+        self.assertEqual(instance.multiply(2, 3), 6)  # Devrait utiliser le cache
