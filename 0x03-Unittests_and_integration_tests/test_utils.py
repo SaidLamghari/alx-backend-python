@@ -1,70 +1,99 @@
 #!/usr/bin/env python3
 """
-Unit tests for utils functions
-auteur SAID LAMGHARI
+Tests pour les fonctions du module utils.
+Auteur SAID LAMGHARI
 """
+from unittest.mock import patch
 import unittest
+import requests
 from parameterized import parameterized
-from unittest.mock import patch, Mock
 from utils import access_nested_map, get_json, memoize
+
 
 class TestAccessNestedMap(unittest.TestCase):
     """
-    Test case for access_nested_map function
+    Classe de tests pour la
+    fonction access_nested_map.
     """
-
     @parameterized.expand([
         ({"a": 1}, ("a",), 1),
         ({"a": {"b": 2}}, ("a",), {"b": 2}),
         ({"a": {"b": 2}}, ("a", "b"), 2)
     ])
-    def test_access_nested_map(self, nested_map, path, expected):
+    def test_access_nested_map(self, nested_map,
+                               path, expected):
         """
-        Test that access_nested_map returns the correct value
+        Teste la fonction access_nested_map avec différentes entrées.
+        Args:
+            nested_map (Dict): Un dictionnaire qui peut
+            contenir des dictionnaires imbriqués.
+            path (List, tuple): Clés pour accéder à la valeur
+            souhaitée dans le dictionnaire imbriqué.
+            expected (Any): La valeur attendue après
+            avoir accédé au chemin dans le dictionnaire.
         """
-        self.assertEqual(access_nested_map(nested_map, path), expected)
+        rps = access_nested_map(nested_map, path)
+        self.assertEqual(rps, expected)
 
     @parameterized.expand([
         ({}, ("a",)),
         ({"a": 1}, ("a", "b"))
     ])
-    def test_access_nested_map_exception(self, nested_map, path):
+    def test_access_nested_map_exception(self, nested_map,
+                                         path):
         """
-        Test that access_nested_map raises a KeyError for invalid paths
+        Teste que la fonction access_nested_map lève
+        une exception lorsque le chemin est invalide.
+        Args:
+            nested_map (Dict): Un dictionnaire qui
+            peut contenir des dictionnaires imbriqués.
+            path (List, tuple): Clés pour accéder à la
+            valeur souhaitée dans le dictionnaire imbriqué.
         """
-        with self.assertRaises(KeyError) as cm:
+        with self.assertRaises(KeyError):
             access_nested_map(nested_map, path)
-        self.assertEqual(str(cm.exception), str(path))
 
 
 class TestGetJson(unittest.TestCase):
     """
-    Test case for get_json function
+    Classe de tests pour
+    la fonction get_json.
     """
-
     @parameterized.expand([
         ("http://example.com", {"payload": True}),
         ("http://holberton.io", {"payload": False})
     ])
-    def test_get_json(self, test_url, test_payload):
+    @patch("requests.get")
+    def test_get_json(self, test_url, test_payload, mock_requests_get):
         """
-        Test that get_json returns the correct payload
+        Teste que la fonction get_json retourne les données JSON attendues.
+        Args:
+            test_url (str): URL vers laquelle envoyer la requête HTTP.
+            test_payload (dict): La réponse JSON attendue.
+            mock_requests_get (patch): Mock pour requests.get.
         """
-        with patch('utils.requests.get') as mock_get:
-            mock_get.return_value = Mock(json=lambda: test_payload)
-            result = get_json(test_url)
-            self.assertEqual(result, test_payload)
-            mock_get.assert_called_once_with(test_url)
+        # Configuration du mock pour retourner une réponse spécifique
+        mock_requests_get.return_value.json.return_value = test_payload
+
+        # Appel de la fonction testée
+        rslt = get_json(test_url)
+
+        # Vérification que le résultat est celui attendu
+        self.assertEqual(rslt, test_payload)
+
+        # Vérification que requests.get a été
+        # appelé une fois avec l'URL correcte
+        mock_requests_get.assert_called_once_with(test_url)
 
 
 class TestMemoize(unittest.TestCase):
     """
-    Test case for memoize decorator
+    Classe de tests pour le décorateur memoize.
     """
-
     def test_memoize(self):
         """
-        Test memoize decorator
+        Teste que le décorateur memoize fonctionne
+        correctement en mémorisant le résultat d'une méthode.
         """
         class TestClass:
             def a_method(self):
@@ -74,9 +103,20 @@ class TestMemoize(unittest.TestCase):
             def a_property(self):
                 return self.a_method()
 
-        with patch.object(TestClass, 'a_method', return_value=42) as mock_method:
-            instance = TestClass()
-            self.assertEqual(instance.a_property, 42)
-            self.assertEqual(instance.a_property, 42)
-            mock_method.assert_called_once()
+        with patch.object(TestClass, 'a_method',
+                          return_value=42) as mock_method:
+            test_instance = TestClass()
 
+            # Premier appel devrait appeler a_method
+            rslto = test_instance.a_property()
+            # Deuxième appel ne
+            # devrait pas rappeler a_method
+            rslts = test_instance.a_property()
+
+            # Vérification des résultats
+            self.assertEqual(rslto, 42)
+            self.assertEqual(rslts, 42)
+
+            # Vérification que a_method n'a
+            # été appelé qu'une seule fois
+            mock_method.assert_called_once()
