@@ -48,7 +48,3 @@ class TestAccessNestedMap(unittest.TestCase):
 
         # Vérifie que le message de l'exception est le message attendu
         self.assertEqual(str(context.exception), expected_exception)
-
-
-if __name__ == "__main__":
-    unittest.main()
