@@ -88,12 +88,12 @@ class TestGetJson(unittest.TestCase):
 
 class TestMemoize(unittest.TestCase):
     """
-    Classe de tests pour le décorateur memoize.
+    Test case for memoize decorator
     """
+
     def test_memoize(self):
         """
-        Teste que le décorateur memoize fonctionne
-        correctement en mémorisant le résultat d'une méthode.
+        Test memoize decorator
         """
         class TestClass:
             def a_method(self):
@@ -104,21 +104,7 @@ class TestMemoize(unittest.TestCase):
                 return self.a_method()
 
         with patch.object(TestClass, 'a_method', return_value=42) as mock_method:
-            test_instance = TestClass()
-
-            # Premier appel devrait appeler a_method
-            rslto = test_instance.a_property()
-            # Deuxième appel ne devrait pas rappeler a_method
-            rslts = test_instance.a_property()
-
-            # Vérification des résultats
-            self.assertEqual(rslto, 42)
-            self.assertEqual(rslts, 42)
-
-            # Vérification que a_method
-            # n'a été appelé qu'une seule fois
+            instance = TestClass()
+            self.assertEqual(instance.a_property, 42)
+            self.assertEqual(instance.a_property, 42)
             mock_method.assert_called_once()
-
-
-if __name__ == '__main__':
-    unittest.main()
