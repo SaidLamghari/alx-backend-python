@@ -103,20 +103,22 @@ class TestMemoize(unittest.TestCase):
             def a_property(self):
                 return self.a_method()
 
-        with patch.object(TestClass, 'a_method',
-                          return_value=42) as mock_method:
+        with patch.object(TestClass, 'a_method', return_value=42) as mock_method:
             test_instance = TestClass()
 
             # Premier appel devrait appeler a_method
             rslto = test_instance.a_property()
-            # Deuxième appel ne
-            # devrait pas rappeler a_method
+            # Deuxième appel ne devrait pas rappeler a_method
             rslts = test_instance.a_property()
 
             # Vérification des résultats
             self.assertEqual(rslto, 42)
             self.assertEqual(rslts, 42)
 
-            # Vérification que a_method n'a
-            # été appelé qu'une seule fois
+            # Vérification que a_method
+            # n'a été appelé qu'une seule fois
             mock_method.assert_called_once()
+
+
+if __name__ == '__main__':
+    unittest.main()
