@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 """
 Tests unitaires pour les fonctions utilitaires
-Auteur: SAID LAMGHARI
+Auteur SAID LAMGHARI
 """
 import unittest
 from parameterized import parameterized
 from unittest.mock import patch, Mock
 from utils import access_nested_map, get_json, memoize
-
 
 class TestAccessNestedMap(unittest.TestCase):
     """
@@ -15,13 +14,14 @@ class TestAccessNestedMap(unittest.TestCase):
     """
 
     @parameterized.expand([
-        ({"a": 1}, ("a",), 1),  # Teste avec un dictionnaire simple et un chemin direct
-        ({"a": {"b": 2}}, ("a",), {"b": 2}),  # Teste avec un dictionnaire imbriqué et un chemin partiel
-        ({"a": {"b": 2}}, ("a", "b"), 2)  # Teste avec un dictionnaire imbriqué et un chemin complet
+        ({"a": 1}, ("a",), 1),  # Test avec un dictionnaire simple et un chemin direct
+        ({"a": {"b": 2}}, ("a",), {"b": 2}),  # Test avec un dictionnaire imbriqué et un chemin partiel
+        ({"a": {"b": 2}}, ("a", "b"), 2)  # Test avec un dictionnaire imbriqué et un chemin complet
     ])
     def test_access_nested_map(self, nested_map, path, expected):
         """
-        Teste que access_nested_map retourne la valeur correcte pour des chemins valides.
+        Teste que access_nested_map retourne la valeur correcte
+        pour des chemins valides.
         """
         self.assertEqual(access_nested_map(nested_map, path), expected)
 
@@ -60,8 +60,7 @@ class TestGetJson(unittest.TestCase):
             result = get_json(test_url)
             self.assertEqual(result, test_payload)
             
-            # Vérifie que requests.get a été
-            # appelé une seule fois avec l'URL correcte
+            # Vérifie que requests.get a été appelé une seule fois avec l'URL correcte
             mock_get.assert_called_once_with(test_url)
 
 
@@ -72,8 +71,7 @@ class TestMemoize(unittest.TestCase):
 
     def test_memoize(self):
         """
-        Teste que le décorateur memoize met en cache
-        les résultats et appelle la méthode uniquement une fois.
+        Teste que le décorateur memoize met en cache les résultats et appelle la méthode uniquement une fois.
         """
         class TestClass:
             def a_method(self):
@@ -89,6 +87,6 @@ class TestMemoize(unittest.TestCase):
             # Accède à la propriété mémoïsée deux fois
             self.assertEqual(instance.a_property, 42)
             self.assertEqual(instance.a_property, 42)
-            # Vérifie que a_method a été appelé une
-            # seule fois en raison de la mise en cache
+            # Vérifie que a_method a été appelé une seule fois en raison de la mise en cache
             mock_method.assert_called_once()
+
